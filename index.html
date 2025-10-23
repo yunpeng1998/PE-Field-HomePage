@@ -1,0 +1,549 @@
+<html>
+<head>
+<title>Positional Encoding Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@200&display=swap" rel="stylesheet"> 
+<style type="text/css">
+.content {
+    width:930px;
+    text-align: left;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 200;
+}
+h1 {
+    font-weight: 600;
+}
+table.authors {
+    width:90%;
+    text-align:center;
+}
+table.authors > tr > td, table.authors > tbody > tr > td {
+    width:33.33%;
+}
+.authors a, .lnk {
+    color:black;
+    text-decoration:underline;
+}
+.authors a:hover, .lnk:hover {
+    color:gray;
+    text-decoration:underline;
+}
+.btn {
+    color:black;
+    text-decoration:none;
+}
+.btn:hover {
+    color:gray;
+    text-decoration:none;
+}
+table.demo1 {
+    width:90%;
+    text-align:center;
+}
+.demo1 img {
+    width:300px;
+}
+td.prompt {
+    width:100%;
+    text-align:center;
+    font-family: monospace;
+    font-size:150%;
+}
+td.prompt a {
+    color:#ddd;
+    text-decoration:none;
+}
+td.prompt a:hover, td.prompt a.active {
+    color:black;
+    text-decoration:none;
+}
+.img-stack {
+    position:relative;
+    display: block;
+    width:300px;
+    height:300px;
+}
+.img-stack img {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 0;
+}
+.img-stack img.active {
+    z-index: 1;
+}
+.img-stack .overlay {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+    transition: opacity .2s;
+    z-index: 2;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background: white;
+}
+.carousel {
+    position:relative;
+    width:650px;
+    height:385px;
+    overflow:hidden;
+}
+.carousel > table {
+    position:absolute;
+    top: 0px;
+    transition: left 1s;
+    width:650px;
+}
+.carousel_table td {
+    text-align:center;
+}
+.carousel_table td:nth-child(2) {
+    font-size:150%;
+}
+pre {
+    background-color:#eee;
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding: 10px;
+white-space: break-spaces;
+width:80%;
+text-align:left;
+}
+td.gif {
+    width: 33%;
+    font-family: monospace;
+    font-size: 120%;
+}
+.dl_link {
+    display: inline-block;
+    padding-right: 6px;
+    padding-left: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.dl_link, .dl_link td {
+    color: black;
+    text-decoration: none;
+    font-size: 120%;
+}
+.dl_link, .dl_link table {
+    border-radius: 5px;
+    background-color: none;
+}
+.dl_link:hover, .dl_link:hover * {
+    color: #404040 !important;
+    background-color: #d9d9d9 !important;
+}
+@media only screen and (max-width: 930px) {
+    .content { width:100% !important; }
+}
+</style>
+<script type="text/javascript">
+  var curr_idx = 0;
+  var num_tables = 6;
+  function move(direction) {
+      if (curr_idx == 0 && direction < 0) {
+	  move(num_tables - 1);
+	  return;
+      }
+      if (curr_idx == num_tables - 1 && direction > 0) {
+	  move(-1 * (num_tables - 1));
+	  return;
+      }
+      tables = document.getElementsByClassName("carousel_table");
+      for(var i = 0; i < tables.length; i++) {
+	  tables[i].style.left = (parseInt(tables[i].style.left.substring(0, tables[i].style.left.length - 2)) - direction * 650).toString() + "px";
+      }
+      curr_idx += direction;
+  }
+  function hideOverlay(classname) {
+      document.getElementById(classname + "_overlay").style.opacity = "0";
+  }
+  function activate(classname, idx, max) {
+      document.getElementById(classname + "_overlay").style.opacity = "1";
+      setTimeout(function() {
+	  for(var i = 1; i <= max; i++) {
+	      document.getElementById(classname + "_" + i.toString()).className = "";
+	      document.getElementById(classname + "_text_" + i.toString()).className = "";
+	  }
+	  document.getElementById(classname + "_" + idx.toString()).className = "active";
+	  document.getElementById(classname + "_text_" + idx.toString()).className = "active";
+	  setTimeout(hideOverlay, 200, classname);
+      }, 200);
+  }
+  var moving = true;
+  var stopCounter = 0;
+  function autoMove(currCounter) {
+      if(moving && currCounter >= stopCounter) {
+	  move(1);
+          setTimeout(autoMove, 5000, stopCounter);
+      }
+  }
+  function beginMoving() {
+      moving = true;
+      setTimeout(autoMove, 5000, stopCounter);
+  }
+  function stopMoving() {
+      moving = false;
+      stopCounter++;
+  }
+</script>
+</head>
+<body dir="ltr" onload="beginMoving();">
+<center><div class="content">
+    <center>
+      <h1>Positional Encoding Field</h1>
+      <table class="authors">
+	<tr>
+	  <td><a href="https://bbaaii.github.io/">Yunpeng Bai</a></td>
+	  <td><a href="https://resume.haoxiang.org/">Haoxiang Li</a></td>
+	  <td><a href="https://www.cs.utexas.edu/~huangqx/">Qixing Huang</a></td>
+	</tr>
+
+      </table>
+
+      <br />
+      <center>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); width:70%; margin:auto; text-align:center;">
+          <a target="_blank" href="https://your-link-here.com" class="dl_link">
+            <img src="images/arxiv-logomark-small@2x.png" style="height:50px;" /><br/>Paper
+          </a>
+          <a target="_blank" href="https://github.com/MTLab/PE-Field" class="dl_link">
+            <img src="images/github_icon.png" style="height:50px;" /><br/>Code
+          </a>
+          <a target="_blank" href="https://huggingface.co/yunpeng1998/PE-Field" class="dl_link">
+            <img src="images/hf-logo.png" style="height:50px;" /><br/>Weights
+          </a>
+        </div>
+      </center>
+
+
+      <br />  
+      <table class="demo1" onmouseenter="stopMoving();" onmouseleave="beginMoving();">
+	<tr>
+	  <td style="width:5%;font-size:150%;" valign="top"><center><div style="height:300px;position:relative;"><a href="#" onclick="move(-1);" class="btn" style="position:absolute;top:147px;">&#9664;</a></div></center></td>
+	  <td style="width:90%;">
+	    <center><div class="carousel">
+
+		<table id="dog_table" class="carousel_table" style="left:0px;">
+      <tr>
+        <td style="text-align:center;padding-left: 50px; ">
+          <b>Input Image</b><br/>
+          <img src="images/Worlds-15-Most-Iconic-Portraits-by-iPhotography.com-8/original_0.png" style="height:300px; width:auto !important;"/>
+        </td>
+        <td style="text-align:center; vertical-align:middle; position:relative; left:-3px;">
+          &rightarrow;
+        </td>       
+        <td style="text-align:center; ">
+          <div style="display:inline-block; text-align:center;">
+            <b>Novel View &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><br/>
+            <div class="img-stack" style="margin:0 auto; height:300px;">
+              <img src="images/Worlds-15-Most-Iconic-Portraits-by-iPhotography.com-8/output_1.png" 
+                   style="height:300px; width:auto !important;" id="dog_1"/>
+              <img src="images/Worlds-15-Most-Iconic-Portraits-by-iPhotography.com-8/output_3.png" 
+                   style="height:300px; width:auto !important;" id="dog_2" />
+              <img src="images/Worlds-15-Most-Iconic-Portraits-by-iPhotography.com-8/output_4.png" 
+                   style="height:300px; width:auto !important;" id="dog_3"  class="active"/>
+              <div class="overlay" id="dog_overlay"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+		  <tr>
+        <td colspan="3" class="prompt">
+          "Scene 
+          <a href="#" id="dog_text_1" onclick="activate('dog', 1, 3);" >Rotate right 10°</a>, 
+          <a href="#" id="dog_text_2" onclick="activate('dog', 2, 3);">Rotate right 20°</a>, 
+          <a href="#" id="dog_text_3" onclick="activate('dog', 3, 3);" class="active">Rotate right 30°</a>"
+        </td>
+      </tr>
+		</table>
+
+
+      <table id="dog_table" class="carousel_table" style="left:650px;">
+        <tr>
+          <td style="text-align:center; ">
+            <b>Input Image</b><br/>
+            <img src="images/038_Albert Einstein_wikimedia_1/original_0.png" style="height:300px; width:auto !important;"/>
+          </td>
+          <td style="text-align:center; vertical-align:middle; position:relative;">
+            &rightarrow;
+          </td>       
+          <td style="text-align:center; ">
+            <div style="display:inline-block; text-align:center;">
+              <b>Novel View </b><br/>
+              <div class="img-stack" style="margin:0 auto; height:300px;">
+                <img src="images/038_Albert Einstein_wikimedia_1/output_1.png" 
+                     style="height:300px; width:auto !important;" id="Albert_1"  />
+                <img src="images/038_Albert Einstein_wikimedia_1/output_2.png" 
+                     style="height:300px; width:auto !important;" id="Albert_2" />
+                <img src="images/038_Albert Einstein_wikimedia_1/output_3.png" 
+                     style="height:300px; width:auto !important;" id="Albert_3"  class="active"/>
+                <div class="overlay" id="Albert_overlay"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="prompt">
+            "Scene 
+            <a href="#" id="Albert_text_1" onclick="activate('Albert', 1, 3);">Rotate left 10°</a>, 
+            <a href="#" id="Albert_text_2" onclick="activate('Albert', 2, 3);">Rotate left 20°</a>, 
+            <a href="#" id="Albert_text_3" onclick="activate('Albert', 3, 3);" class="active">Rotate left 30°</a>"
+          </td>
+        </tr>
+      </table>
+
+
+
+      <table id="dog_table" class="carousel_table" style="left:1300px;">
+        <tr>
+          <td style="text-align:center; ">
+            <b>Input Image</b><br/>
+            <img src="images/038_Albert Einstein_wikimedia/original_0.png" style="height:300px; width:auto !important;"/>
+          </td>
+          <td style="text-align:center; vertical-align:middle; position:relative;">
+            &rightarrow;
+          </td>       
+          <td style="text-align:center; ">
+            <div style="display:inline-block; text-align:center;">
+              <b>Novel View </b><br/>
+              <div class="img-stack" style="margin:0 auto; height:300px;">
+                <img src="images/038_Albert Einstein_wikimedia/output_0.png" 
+                     style="height:300px; width:auto !important;" id="Albert2_1" />
+                <img src="images/038_Albert Einstein_wikimedia/output_2.png" 
+                     style="height:300px; width:auto !important;" id="Albert2_2" />
+                <img src="images/038_Albert Einstein_wikimedia/output_4.png" 
+                     style="height:300px; width:auto !important;" id="Albert2_3" class="active"/>
+                <div class="overlay" id="Albert2_overlay"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="prompt">
+            "Scene 
+            <a href="#" id="Albert2_text_1" onclick="activate('Albert2', 1, 3);">Rotate right 10°</a>, 
+            <a href="#" id="Albert2_text_2" onclick="activate('Albert2', 2, 3);">Rotate right 20°</a>, 
+            <a href="#" id="Albert2_text_3" onclick="activate('Albert2', 3, 3);" class="active">Rotate right 30°</a>"
+          </td>
+        </tr>
+      </table>
+
+
+      <table id="person_table" class="carousel_table" style="left:1950px;">
+        <tr>
+          <td style="text-align:center;padding-left: 100px; ">
+            <b>Input Image</b><br/>
+            <img src="images/07061200839a42ba9381dcde650f8ce7/original_0.png" style="height:300px; width:auto !important;"/>
+          </td>
+          <td style="text-align:center; vertical-align:middle; position:relative; left:-3px;">
+            &rightarrow;
+          </td>       
+          <td style="text-align:center; ">
+            <div style="display:inline-block; text-align:center;">
+              <b>Novel View &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b><br/>
+              <div class="img-stack" style="margin:0 auto; height:300px;">
+                <img src="images/07061200839a42ba9381dcde650f8ce7/output_2.png" 
+                     style="height:300px; width:auto !important;" id="person_1" class="active" />
+                <img src="images/07061200839a42ba9381dcde650f8ce7/output_3.png" 
+                     style="height:300px; width:auto !important;" id="person_2" />
+                <img src="images/07061200839a42ba9381dcde650f8ce7/output_4.png" 
+                     style="height:300px; width:auto !important;" id="person_3" />
+                <div class="overlay" id="person_overlay"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="prompt">
+            "Scene 
+            <a href="#" id="person_text_1" onclick="activate('person', 1, 3);">Rotate right 10°</a>, 
+            <a href="#" id="person_text_2" onclick="activate('person', 2, 3);">Rotate right 20°</a>, 
+            <a href="#" id="person_text_3" onclick="activate('person', 3, 3);" class="active">Rotate right 30°</a>"
+          </td>
+        </tr>
+      </table>
+
+
+    <table id="dog_table" class="carousel_table" style="left:2600px;">
+      <tr>
+        <td style="text-align:center;">
+          <b>Input Image</b><br/>
+          <img src="images/MV5BMTQyMDc0ODY1OV5BMl5BanBnXkFtZTgwMDI4NjIwMjE@._V1_QL75_UX480_/original_0.png" style="height:300px; width:300px;"/>
+        </td>
+        <td style="text-align:center; vertical-align:middle; position:relative; left:-3px;">
+          &rightarrow;
+        </td>       
+        <td style="text-align:center; ">
+          <div style="display:inline-block; text-align:center;">
+            <b>Novel View </b><br/>
+            <div class="img-stack" style="margin:0 auto; height:300px;">
+              <img src="images/MV5BMTQyMDc0ODY1OV5BMl5BanBnXkFtZTgwMDI4NjIwMjE@._V1_QL75_UX480_/output_1.png" 
+              style="height:300px; width:300px;" id="mv_1"  />
+              <img src="images/MV5BMTQyMDc0ODY1OV5BMl5BanBnXkFtZTgwMDI4NjIwMjE@._V1_QL75_UX480_/output_3.png" 
+              style="height:300px; width:300px;" id="mv_2" />
+              <img src="images/MV5BMTQyMDc0ODY1OV5BMl5BanBnXkFtZTgwMDI4NjIwMjE@._V1_QL75_UX480_/output_4.png" 
+              style="height:300px; width:300px;" id="mv_3"  class="active"/>
+              <div class="overlay" id="mv_overlay"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+		  <tr>
+        <td colspan="3" class="prompt">
+          "Scene 
+          <a href="#" id="mv_text_1" onclick="activate('mv', 1, 3);">Rotate right 10°</a>, 
+          <a href="#" id="mv_text_2" onclick="activate('mv', 2, 3);">Rotate right 20°</a>, 
+          <a href="#" id="mv_text_3" onclick="activate('mv', 3, 3);" class="active">Rotate right 30°</a>"
+        </td>
+      </tr>
+		</table>
+    
+
+
+    <table id="dog_table" class="carousel_table" style="left:3250px; top: 70px;">
+      <tr>
+        <td style="text-align:center; vertical-align:middle;">
+          <b>Input Image</b><br/>
+          <img src="images/spiderman/original_0.png" style="height:auto !important; width:300px;"/>
+        </td>
+        <td style="text-align:center; vertical-align:middle; position:relative; left:-3px;">
+          &rightarrow;
+        </td>       
+        <td style="text-align:center; vertical-align:middle;">
+          <div style="display:inline-block; text-align:center;">
+            <b>Novel View </b><br/>
+            <div class="img-stack" style="margin:0 auto; height: 162px;">
+              <img src="images/spiderman/output_1.png" 
+              style="height:auto !important; width:300px;" id="spiderman_1"  />
+              <img src="images/spiderman/output_2.png" 
+              style="height:auto !important; width:300px;" id="spiderman_2" />
+              <img src="images/spiderman/output_3.png" 
+              style="height:auto !important; width:300px;" id="spiderman_3"  class="active"/>
+              <div class="overlay" id="spiderman_overlay"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr style="position: relative; z-index: 100;">
+        <td colspan="3" class="prompt" style="padding-top: 20px;">
+          "Scene 
+          <a href="#" id="spiderman_text_1" onclick="activate('spiderman', 1, 3);">Rotate right 10°</a>, 
+          <a href="#" id="spiderman_text_2" onclick="activate('spiderman', 2, 3);">Rotate right 20°</a>, 
+          <a href="#" id="spiderman_text_3" onclick="activate('spiderman', 3, 3);" class="active">Rotate right 30°</a>"
+        </td>
+      </tr>
+    </table>
+
+
+
+	      </div>
+	    </center>
+	  </td>
+	  <td style="width:5%;font-size:150%;" valign="top"><center><div style="height:300px;position:relative;"><a href="#" onclick="move(1);" class="btn" style="position:absolute;top:147px;">&#9658;</a></div></center></td>
+	</tr>
+      </table>
+      <span style="font-size:110%;">PE-Field can achieve high-quality Novel View synthesis results simply by operating on DiT's Positional Encoding.</span><br /><br />
+      <!-- <b><a href="https://bbaaii.github.io/" class="lnk">arXiv</a></b>&nbsp;&nbsp;|&nbsp;&nbsp;<b><a href="https://bbaaii.github.io/" class="lnk">PDF</a></b> -->
+    </center>
+    <br />
+    <div id="abstract" style="border-top:1px solid gray;">
+    <h2>Abstract</h2>
+    <p>
+      Diffusion Transformers (DiTs) have emerged as the dominant architecture for visual generation, powering state-of-the-art image and video models. By representing images as patch tokens with positional encodings (PEs), DiTs combine Transformer scalability with spatial and temporal inductive biases. In this work, we revisit how DiTs organize visual content and discover that patch tokens exhibit a surprising degree of independence: even when PEs are perturbed, DiTs still produce globally coherent outputs, indicating that spatial coherence is primarily governed by PEs. Motivated by this finding, we introduce the Positional Encoding Field (PE-Field), which extends positional encodings from the 2D plane to a structured 3D field. PE-Field incorporates depth-aware encodings for volumetric reasoning and hierarchical encodings for fine-grained sub-patch control, enabling DiTs to model geometry directly in 3D space. Our PE-Field–augmented DiT achieves state-of-the-art performance on single-image novel view synthesis and generalizes to controllable spatial image editing.    </p>
+    </div>
+
+    <br />
+
+    <div id="method" style="border-top:1px solid gray;">
+      <h2>Analysis of PE in DiT:</h2>
+    
+
+      <br />
+      <div style="width:80%; margin:auto; margin-bottom:20px; text-align:left;">
+        <h4 style="margin:0 0 5px 20px; font-weight:500;">Figure 1: Illustration of DiT patch-level independence.</h4>
+        <br />
+        <center>
+          <img src="images/pe_analysis_1.png" style="width:100%;" />
+        </center>
+      </div>
+      <br />
+
+      <div style="width:80%; margin:auto; margin-bottom:20px; text-align:left;">
+        <h4 style="margin:0 0 5px 20px; font-weight:500;">Figure 2: Illustration of direct novel view synthesis (NVS) Results. </h4>
+        <br />
+        <center>
+          <img src="images/pe_analysis_2.png" style="width:100%;" />
+        </center>
+      </div>
+    
+      
+      When positional encodings (PEs) of image tokens or noise tokens are perturbed, the decoded or generated outputs still produce semantically meaningful images. The resulting structures follow the warping imposed by the PE modification, while boundaries between patches remain visually distinct.    
+      <br />
+      We apply 2D positional encodings (PEs) derived from 3D reconstruction and view transformation directly to the source-view image tokens. Using these modified tokens as image conditions in DiT enables direct generation of a relatively accurate novel-view image.
+    <br />
+    </div>
+
+    <br />
+    <div id="method" style="border-top:1px solid gray;">
+    
+    <h2>Method</h2>
+    <center>
+      <img src="images/method.png" style="width:80%;" />
+    </center><br />
+    The transformer takes both noise tokens and source-view image tokens. Noise tokens are placed on a 2D grid with depth set to zero, while image tokens are assigned hierarchical PEs according to their projected positions from monocular reconstruction and view transformation, with depth values taken from the reconstruction. Tokens projected outside the grid (e.g., index 6) are discarded, and empty grid locations without image tokens (e.g., index 0) are filled by noise, which is refined to generate plausible content.
+    </div>
+
+
+    <br />
+    <div id="examples" style="border-top:1px solid gray;">
+    <h2>Comparisons</h2>
+    <center>
+      <img src="images/results.png" style="width:90%;" /><br /><br />
+
+    </center>
+    </div>
+
+
+    <br />
+    <div id="applications" style="border-top:1px solid gray;">
+    <h2>Applications</h2>
+    <center>
+      <img src="images/applications.png" style="width:90%;" /><br /><br />
+      The left example shows object 3D editing, while the right example shows object removal, highlighting the versatility of our model in different spatial editing tasks.
+    </center>
+    </div>
+
+
+    <br />
+    <div id="paper" style="border-top:1px solid gray;">
+    <h2>Paper</h2>
+    <table><tr>
+	<td valign="middle" style="padding-right:50px;"><img src="images/method.png" style="width:300px;" /></td>
+	<td valign="top">
+	  <b>"Positional Encoding Field "</b>,<br /><br/>
+	  Yunpeng Bai, Haoxiang Li, Qixing Huang.<br /><br />
+      Arxiv 2025<br /><br />
+	  <b>[</b><a href="https://bbaaii.github.io/" class="lnk">PDF</a><b>]</b>
+	</td>
+    </tr></table>
+    </div>
+    
+    <br />
+    <div id="bibtex" style="border-top:1px solid gray;">
+    <h2>BibTeX</h2>
+    <center><pre><code>@article{bai2025positional,
+  title   = {Positional Encoding Field},
+  author  = {Bai Yunpeng, Li Haoxiang, Huang Qixing},
+  journal = {arXiv preprint arXiv:2501.xxxxx},
+  year    = {2025}
+}
+}</code></pre></center>
+    </div>
+</div></center>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
